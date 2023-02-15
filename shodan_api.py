@@ -10,7 +10,7 @@ class Shodanbrowser:
         except Exception as e:
             print('Error: {}'.format(e))
         
-    #Metodo que realiza la busqueda filtrando por dispositivos iot con http
+    # Metodo que realiza la busqueda filtrando por dispositivos iot con http
     def searchiotdevices(self, query):
         devices=0
         try:
@@ -18,7 +18,7 @@ class Shodanbrowser:
             for result in results['matches']:
                 host=self.api.host(result['ip_str'])
 
-                if ('iot' in host['tags']):
+                #if ('iot' in host['tags']):
                     #for port in host['ports']:
                         #urlhost='http://'+str(result['ip_str'])+':'+str(port)
                         #result = {'status': 0}
@@ -27,10 +27,10 @@ class Shodanbrowser:
                         #except requests.exceptions.ConnectionError:
                             #result={'status':-1}
                         #if result['status']>=0:
-                            devices+=1
-                            print(result['ip_str'])
-                            print(result['data'])
-                            print(host['ports'])
+                devices+=1
+                print(result['ip_str'])
+                print(result['data'])
+                print(host['ports'])
 
             return devices
         except Exception as e:
