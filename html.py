@@ -21,7 +21,7 @@ class HTML(BeautifulSoup):
             txt_fields = form.find_all('input', attrs={'name': True, 'type': 'text'})
             pwd_fields = form.find_all('input', attrs={'name': True, 'type': 'password'})
 
-            if (len(txt_fields) != 1 or len(pwd_fields) != 1):
+            if len(txt_fields) != 1 or len(pwd_fields) != 1:
                 continue
 
             usr_field = txt_fields[0]
