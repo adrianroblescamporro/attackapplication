@@ -76,8 +76,14 @@ class Cracker:
         else:
             print('Usuario y contraseña incorrectos')
 
-    def seleniumformcrack(self):
+    def seleniumformcrack(self, username, password):
         driver=webdriver.Safari()
         driver.get(self.urlattack)
 
-        user_box = driver.find_element_by_id('username')
+        user_box = driver.find_element("id", "username")
+        pass_box=driver.find_element("id", "password")
+        login=driver.find_element("class_name", "ui-button fn-width80")
+        user_box.send_keys(username)
+        pass_box.send_keys(password)
+        login.click()
+        driver.close()
