@@ -6,27 +6,26 @@ from requests.packages.urllib3.exceptions import InsecureRequestWarning
 
 
 class HTTPrequest:
-
-    request_tries=3
+    request_tries = 3
 
     def __init__(self):
         requests.packages.urllib3.disable_warnings(InsecureRequestWarning)
 
     def request(self, request):
-        result={'status':0}
-        response=None
+        result = {'status': 0}
+        response = None
 
-        tries=self.request_tries
+        tries = self.request_tries
         while tries:
             try:
-                response=requests.request(**request)
+                response = requests.request(**request)
                 break
 
             except requests.exceptions.ConnectionError:
-                result={'status':-1}
+                result = {'status': -1}
 
             except socket.timeout:
-                result={'status':-2}
+                result = {'status': -2}
 
-            tries-=1
+            tries -= 1
         return response, result
