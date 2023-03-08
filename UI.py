@@ -1,5 +1,6 @@
+import os
 import sys
-from PyQt5 import uic, QtWidgets
+from PyQt5 import uic, QtWidgets, QtGui
 from shodan import Shodan
 
 from shodan_api import Shodanbrowser
@@ -19,6 +20,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         self.devices = {}
         self.pushButton.clicked.connect(self.ejecutar_busqueda)
+        self.pushButton_2.clicked.connect(self.ejecutar_ataque)
+        self.lineEdit_3.setValidator(QtGui.QIntValidator())
 
     def check_api_key(self, possible_api_key):
         try:
@@ -30,23 +33,38 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def ejecutar_busqueda(self):
         apikey = self.lineEdit.text()
-        filtro = self.lineEdit_2.text()
+        filter = self.lineEdit_2.text()
         self.listWidget.clear()
 
-        if apikey == "" or filtro == "":
+        if apikey == "" or filter == "":
             QMessageBox.critical(self, "Error", "Algún campo incompleto", QMessageBox.StandardButton.Ok)
 
         else:
             if self.check_api_key(apikey):
-                shodanbrowser = Shodanbrowser(apikey)
-                self.devices = shodanbrowser.searchiotdevices(filtro)
-                num=1
+                shodan_browser = Shodanbrowser(apikey)
+                self.devices = shodan_browser.searchiotdevices(filter)
+                num = 1
                 for device in self.devices:
-                    listWidgetItem = QListWidgetItem(str(num)+". IP = "+device+" Port = "+str(self.devices[device]))
+                    listWidgetItem = QListWidgetItem(
+                        str(num) + ". IP = " + device + " Port = " + str(self.devices[device]))
                     self.listWidget.addItem(listWidgetItem)
-                    num+=1
+                    num += 1
             else:
                 QMessageBox.critical(self, "Error", "API-Key no válida", QMessageBox.StandardButton.Ok)
+
+    def ejecutar_ataque(self):
+        num_disp = self.lineEdit_3.text()
+        dict_user = self.lineEdit_4.text()
+        dict_pass = self.lineEdit_5.text()
+        if num_disp == "" or dict_user == "" or dict_pass == "":
+            QMessageBox.critical(self, "Error", "Algún campo incompleto", QMessageBox.StandardButton.Ok)
+        else:
+            if num_disp>len(self.devices):
+                QMessageBox.critical(self, "Error", "No existe el dispositivo", QMessageBox.StandardButton.Ok)
+            else:
+                if not os.path.exists(dict_user) or not os.path.exists(dict_pass):
+                    QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
+                
 
 
 if __name__ == "__main__":
