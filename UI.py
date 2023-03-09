@@ -54,17 +54,18 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def ejecutar_ataque(self):
         num_disp = self.lineEdit_3.text()
-        dict_user = self.lineEdit_4.text()
-        dict_pass = self.lineEdit_5.text()
-        if num_disp == "" or dict_user == "" or dict_pass == "":
+        dict = self.lineEdit_4.text()
+        if num_disp == "" or dict == "":
             QMessageBox.critical(self, "Error", "Algún campo incompleto", QMessageBox.StandardButton.Ok)
         else:
-            if num_disp>len(self.devices):
+            if num_disp > len(self.devices):
                 QMessageBox.critical(self, "Error", "No existe el dispositivo", QMessageBox.StandardButton.Ok)
             else:
-                if not os.path.exists(dict_user) or not os.path.exists(dict_pass):
+                if not os.path.exists(dict):
                     QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
-                
+                else:
+                    url_attack=
+                    cracker=Cracker(dict)
 
 
 if __name__ == "__main__":

