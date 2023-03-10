@@ -13,10 +13,9 @@ class HTTPrequest:
 
     def request(self, request):
         result = {'status': 0}
-        response = None
 
         tries = self.request_tries
-        while tries:
+        while True:
             try:
                 response = requests.request(**request)
                 break

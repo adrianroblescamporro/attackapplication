@@ -12,21 +12,25 @@ class Shodanbrowser(HTTPrequest):
     # Metodo que realiza la busqueda filtrando por dispositivos iot con http
     def searchiotdevices(self, query):
         try:
+            list_dev = {}
+            count = 1
             devices = {}
             results = self.api.search(query)
             for resultdev in results['matches']:
-                #host = self.api.host(resultdev['ip_str'])
+                # host = self.api.host(resultdev['ip_str'])
                 devices[resultdev['ip_str']] = resultdev['port']
-                #if 'iot' in host['tags']:
-                    #devices[resultdev['ip_str']] = resultdev['port']
-                #for port in host['ports']:
-                        #urlhost = 'http://' + str(resultdev['ip_str']) + ':' + str(port)
-                        #request = {'method': 'get', 'url': urlhost}
-                        #response, result = self.request(request)
-                        #print(response)
-                        #print(result)
-                        #if result['status'] >= 0:
-                            #devices[resultdev['ip_str']] = port
-            return devices
+                list_dev[count] = resultdev['ip_str']
+                count += 1
+                # if 'iot' in host['tags']:
+                # devices[resultdev['ip_str']] = resultdev['port']
+                # for port in host['ports']:
+                # urlhost = 'http://' + str(resultdev['ip_str']) + ':' + str(port)
+                # request = {'method': 'get', 'url': urlhost}
+                # response, result = self.request(request)
+                # print(response)
+                # print(result)
+                # if result['status'] >= 0:
+                # devices[resultdev['ip_str']] = port
+            return devices, list_dev
         except Exception as e:
             print('Error: {}'.format(e))

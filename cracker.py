@@ -28,10 +28,10 @@ class Cracker(HTTPrequest):
 
     def workerbasic(self, dict):
         self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
-        line = dict.readline
+        line = dict.readline()
         self.lock_acceso_fichero.release()
         while line != "":
-            [username, password] = line.split(':')
+            [username, password] = line.split(sep=':')
             request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPBasicAuth(username, password)}
             response, result = self.request(request)
             if result['status'] < 0:
@@ -46,10 +46,10 @@ class Cracker(HTTPrequest):
 
     def workerdigest(self, dict):
         self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
-        line = dict.readline
+        line = dict.readline()
         self.lock_acceso_fichero.release()
         while line != "":
-            [username, password] = line.split(':')
+            [username, password] = line.split(sep=':')
             request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPDigestAuth(username, password)}
             response, result = self.request(request)
             if result['status'] < 0:
@@ -70,10 +70,10 @@ class Cracker(HTTPrequest):
         login = driver.find_element("class_name", "ui-button fn-width80")
 
         self.lock_acceso_fichero.acquire()  # pedimos acceso al recurso
-        line = dict.readline
+        line = dict.readline()
         self.lock_acceso_fichero.release()
         while line != "":
-            [username, password] = line.split(':')
+            [username, password] = line.split(sep=':')
             user_box.send_keys(username)
             pass_box.send_keys(password)
             login.click()
@@ -83,20 +83,21 @@ class Cracker(HTTPrequest):
         driver.close()
 
     def attack(self):
+        self.detect_auth()
         diction = open(self.dictionary)
         thread_count = 4
         threads = []
         for i in range(thread_count):
             if self.authentication == 'basic':
-                t = threading.Thread(target=self.workerbasic, args=diction)
+                t = threading.Thread(target=self.workerbasic(diction))
                 threads.append(t)
                 t.start()
             elif self.authentication == 'digest':
-                t = threading.Thread(target=self.workerdigest, args=diction)
+                t = threading.Thread(target=self.workerdigest(diction))
                 threads.append(t)
                 t.start()
             elif self.authentication == 'form':
-                t = threading.Thread(target=self.workerform, args=diction)
+                t = threading.Thread(target=self.workerform(diction))
                 threads.append(t)
                 t.start()
 

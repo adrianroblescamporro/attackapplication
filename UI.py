@@ -4,6 +4,7 @@ from PyQt5 import uic, QtWidgets, QtGui
 from shodan import Shodan
 
 from shodan_api import Shodanbrowser
+from cracker import Cracker
 
 # Inicializa las ventanas
 from PyQt5.QtWidgets import QMessageBox, QWidget, QHBoxLayout, QLabel, QComboBox, QListWidgetItem
@@ -19,6 +20,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.setupUi(self)
 
         self.devices = {}
+        self.list_dev = {}
         self.pushButton.clicked.connect(self.ejecutar_busqueda)
         self.pushButton_2.clicked.connect(self.ejecutar_ataque)
         self.lineEdit_3.setValidator(QtGui.QIntValidator())
@@ -33,20 +35,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def ejecutar_busqueda(self):
         apikey = self.lineEdit.text()
-        filter = self.lineEdit_2.text()
+        filter_search = self.lineEdit_2.text()
         self.listWidget.clear()
 
-        if apikey == "" or filter == "":
+        if apikey == "" or filter_search == "":
             QMessageBox.critical(self, "Error", "Algún campo incompleto", QMessageBox.StandardButton.Ok)
 
         else:
             if self.check_api_key(apikey):
                 shodan_browser = Shodanbrowser(apikey)
-                self.devices = shodan_browser.searchiotdevices(filter)
+                self.devices, self.list_dev = shodan_browser.searchiotdevices(filter_search)
                 num = 1
-                for device in self.devices:
+                for element in self.list_dev:
                     listWidgetItem = QListWidgetItem(
-                        str(num) + ". IP = " + device + " Port = " + str(self.devices[device]))
+                        str(element) + ". IP = " + self.list_dev[element] + " Port = " + str(
+                            self.devices[self.list_dev[element]]))
                     self.listWidget.addItem(listWidgetItem)
                     num += 1
             else:
@@ -54,18 +57,20 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
     def ejecutar_ataque(self):
         num_disp = self.lineEdit_3.text()
-        dict = self.lineEdit_4.text()
-        if num_disp == "" or dict == "":
+        dictionary = self.lineEdit_4.text()
+        if num_disp == "" or dictionary == "":
             QMessageBox.critical(self, "Error", "Algún campo incompleto", QMessageBox.StandardButton.Ok)
         else:
-            if num_disp > len(self.devices):
+            if int(num_disp) > len(self.list_dev):
                 QMessageBox.critical(self, "Error", "No existe el dispositivo", QMessageBox.StandardButton.Ok)
             else:
-                if not os.path.exists(dict):
+                if not os.path.exists(dictionary):
                     QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
                 else:
-                    url_attack=
-                    cracker=Cracker(dict)
+                    IP = self.list_dev[int(num_disp)]
+                    url_attack = 'http://' + IP + ':' + str(self.devices[IP])
+                    cracker = Cracker(url_attack, dictionary)
+                    cracker.attack()
 
 
 if __name__ == "__main__":
