@@ -15,22 +15,15 @@ class Shodanbrowser(HTTPrequest):
             list_dev = {}
             count = 1
             devices = {}
+            http_ports = []
             results = self.api.search(query)
             for resultdev in results['matches']:
-                # host = self.api.host(resultdev['ip_str'])
-                devices[resultdev['ip_str']] = resultdev['port']
+                host = self.api.host(resultdev['ip_str'])
                 list_dev[count] = resultdev['ip_str']
                 count += 1
-                # if 'iot' in host['tags']:
-                # devices[resultdev['ip_str']] = resultdev['port']
-                # for port in host['ports']:
-                # urlhost = 'http://' + str(resultdev['ip_str']) + ':' + str(port)
-                # request = {'method': 'get', 'url': urlhost}
-                # response, result = self.request(request)
-                # print(response)
-                # print(result)
-                # if result['status'] >= 0:
-                # devices[resultdev['ip_str']] = port
+                devices[resultdev['ip_str']] = host['ports']
+
             return devices, list_dev
+
         except Exception as e:
             print('Error: {}'.format(e))

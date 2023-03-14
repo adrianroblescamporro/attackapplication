@@ -48,8 +48,8 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 num = 1
                 for element in self.list_dev:
                     listWidgetItem = QListWidgetItem(
-                        str(element) + ". IP = " + self.list_dev[element] + " Port = " + str(
-                            self.devices[self.list_dev[element]]))
+                        str(element) + ". IP = " + self.list_dev[element] + " Ports = " + str(
+                        self.devices[self.list_dev[element]]))
                     self.listWidget.addItem(listWidgetItem)
                     num += 1
             else:
