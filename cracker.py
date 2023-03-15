@@ -19,13 +19,16 @@ class Cracker(HTTPrequest):
     def detect_auth(self):
         request = {'method': 'get', 'url': self.url_attack}
         response, result = self.request(request)
-        if response.status_code == 200:
-            self.authentication = 'form'
-        if response.status_code == 401:
-            if response.headers['WWW-Authenticate'].find('Basic') != -1:
-                self.authentication = 'basic'
-            elif response.headers['WWW-Authenticate'].find('Digest') != -1:
-                self.authentication = 'digest'
+        if result['status'] >= 0:
+            if response.status_code == 200:
+                self.authentication = 'form'
+            if response.status_code == 401:
+                if response.headers['WWW-Authenticate'].find('Basic') != -1:
+                    self.authentication = 'basic'
+                elif response.headers['WWW-Authenticate'].find('Digest') != -1:
+                    self.authentication = 'digest'
+        return result
+
 
     def read_dict(self):
         with open(self.dictionary) as file:
@@ -82,7 +85,6 @@ class Cracker(HTTPrequest):
         driver.close()
 
     def attack(self):
-        self.detect_auth()
         self.read_dict()
         thread_count = 4
         threads = []

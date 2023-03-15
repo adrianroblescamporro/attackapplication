@@ -15,7 +15,6 @@ class Shodanbrowser(HTTPrequest):
             list_dev = {}
             count = 1
             devices = {}
-            http_ports = []
             results = self.api.search(query)
             for resultdev in results['matches']:
                 host = self.api.host(resultdev['ip_str'])

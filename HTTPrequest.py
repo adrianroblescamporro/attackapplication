@@ -1,4 +1,3 @@
-import socket
 
 import requests
 import socket
@@ -13,9 +12,9 @@ class HTTPrequest:
 
     def request(self, request):
         result = {'status': 0}
-
+        response = None
         tries = self.request_tries
-        while True:
+        while tries > 0:
             try:
                 response = requests.request(**request)
                 break
@@ -27,4 +26,5 @@ class HTTPrequest:
                 result = {'status': -2}
 
             tries -= 1
+
         return response, result
