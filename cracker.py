@@ -1,4 +1,3 @@
-
 import threading
 
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
@@ -28,7 +27,6 @@ class Cracker(HTTPrequest):
                 elif response.headers['WWW-Authenticate'].find('Digest') != -1:
                     self.authentication = 'digest'
         return result
-
 
     def read_dict(self):
         with open(self.dictionary) as file:

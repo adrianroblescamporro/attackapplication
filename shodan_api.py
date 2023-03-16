@@ -1,13 +1,14 @@
-from HTTPrequest import HTTPrequest
+
 from shodan import Shodan
 
 
-class Shodanbrowser(HTTPrequest):
+class Shodanbrowser():
 
     # Metodo que inicializa la api de Shodan con la API-Key gratuita
     def __init__(self, api_key):
-        super(HTTPrequest, self).__init__()
         self.api = Shodan(api_key)
+        self.devices_found = 0
+        self.num_devices = 1
 
     # Metodo que realiza la busqueda filtrando por dispositivos iot con http
     def searchiotdevices(self, query):
@@ -16,6 +17,7 @@ class Shodanbrowser(HTTPrequest):
             count = 1
             devices = {}
             results = self.api.search(query)
+            self.num_devices = len(results)
             for resultdev in results['matches']:
                 host = self.api.host(resultdev['ip_str'])
                 list_dev[count] = resultdev['ip_str']

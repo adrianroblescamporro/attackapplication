@@ -22,8 +22,14 @@ class HTTPrequest:
             except requests.exceptions.ConnectionError:
                 result = {'status': -1}
 
-            except socket.timeout:
+            except requests.exceptions.HTTPError:
                 result = {'status': -2}
+
+            except requests.exceptions.Timeout:
+                result = {'status': -3}
+
+            except socket.timeout:
+                result = {'status': -4}
 
             tries -= 1
 
