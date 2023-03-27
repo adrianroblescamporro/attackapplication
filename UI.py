@@ -1,13 +1,14 @@
 import os
 import sys
-from PyQt5 import uic, QtWidgets, QtGui
+
+from PyQt6 import uic, QtWidgets, QtGui
 from shodan import Shodan
 
 from shodan_api import Shodanbrowser
 from cracker import Cracker
 
 # Inicializa las ventanas
-from PyQt5.QtWidgets import QMessageBox, QWidget, QHBoxLayout, QLabel, QComboBox, QListWidgetItem
+from PyQt6.QtWidgets import QMessageBox, QWidget, QHBoxLayout, QLabel, QComboBox, QListWidgetItem
 
 qtCreatorFile = "UI.ui"
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
@@ -34,6 +35,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton_2.clicked.connect(self.ejecutar_ataque)
         self.lineEdit_3.setValidator(QtGui.QIntValidator())
         self.lineEdit_5.setValidator(QtGui.QIntValidator())
+        self.shodan_browser = None
 
     def ejecutar_busqueda(self):
         apikey = self.lineEdit.text()
@@ -45,15 +47,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
 
         else:
             if check_api_key(apikey):
-                shodan_browser = Shodanbrowser(apikey)
-                self.devices, self.list_dev = shodan_browser.searchiotdevices(filter_search)
-                num = 1
-                for element in self.list_dev:
-                    listWidgetItem = QListWidgetItem(
-                        str(element) + ". IP = " + self.list_dev[element] + " Ports = " + str(
-                            self.devices[self.list_dev[element]]))
-                    self.listWidget.addItem(listWidgetItem)
-                    num += 1
+                self.shodan_browser = Shodanbrowser(apikey, filter_search)
+                self.shodan_browser.State.connect(self.label_search.setText)
+                self.shodan_browser.Info.connect(self.listWidget.addItem)
+                self.shodan_browser.start()
+
+
             else:
                 QMessageBox.critical(self, "Error", "API-Key no válida", QMessageBox.StandardButton.Ok)
 
@@ -81,11 +80,12 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                         else:
                             self.textEdit.append('No se admiten peticiones HTTP')
                     else:
-                        QMessageBox.critical(self, "Error", "Puerto no abierto en el dispositivo", QMessageBox.StandardButton.Ok)
+                        QMessageBox.critical(self, "Error", "Puerto no abierto en el dispositivo",
+                                             QMessageBox.StandardButton.Ok)
 
 
 if __name__ == "__main__":
     app = QtWidgets.QApplication(sys.argv)
     window = MyApp()
     window.show()
-    sys.exit(app.exec_())
+    sys.exit(app.exec())

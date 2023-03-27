@@ -84,7 +84,7 @@ class Cracker(HTTPrequest):
 
     def attack(self):
         self.read_dict()
-        thread_count = 4
+        thread_count = 1
         threads = []
         for i in range(thread_count):
             if self.authentication == 'basic':
