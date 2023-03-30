@@ -36,6 +36,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.lineEdit_3.setValidator(QtGui.QIntValidator())
         self.lineEdit_5.setValidator(QtGui.QIntValidator())
         self.shodan_browser = None
+        self.cracker = None
 
     def ejecutar_busqueda(self):
         apikey = self.lineEdit.text()
@@ -57,31 +58,19 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 QMessageBox.critical(self, "Error", "API-Key no válida", QMessageBox.StandardButton.Ok)
 
     def ejecutar_ataque(self):
-        num_disp = self.lineEdit_3.text()
         dictionary = self.lineEdit_4.text()
-        port = self.lineEdit_5.text()
         self.textEdit.clear()
-        if num_disp == "" or dictionary == "" or port == "":
-            QMessageBox.critical(self, "Error", "Algún campo incompleto", QMessageBox.StandardButton.Ok)
+        if self.shodan_browser is None or dictionary == "":
+            QMessageBox.critical(self, "Error", "Algún campo de información incompleto", QMessageBox.StandardButton.Ok)
         else:
-            if int(num_disp) > len(self.list_dev):
-                QMessageBox.critical(self, "Error", "No existe el dispositivo", QMessageBox.StandardButton.Ok)
+            disp = self.listWidget.currentItem().text()
+            if not os.path.exists(dictionary):
+                QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
             else:
-                if not os.path.exists(dictionary):
-                    QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
-                else:
-                    IP = self.list_dev[int(num_disp)]
-                    if int(port) in self.devices[IP]:
-                        url_attack = 'http://' + IP + ':' + port
-                        cracker = Cracker(url_attack, dictionary)
-                        result = cracker.detect_auth()
-                        if result['status'] >= 0:
-                            cracker.attack()
-                        else:
-                            self.textEdit.append('No se admiten peticiones HTTP')
-                    else:
-                        QMessageBox.critical(self, "Error", "Puerto no abierto en el dispositivo",
-                                             QMessageBox.StandardButton.Ok)
+                url_attack = 'http://' + disp
+                self.cracker = Cracker(url_attack, dictionary)
+                self.cracker.Info.connect(self.textEdit.append)
+                self.cracker.start()
 
 
 if __name__ == "__main__":
