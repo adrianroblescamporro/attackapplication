@@ -33,8 +33,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.list_dev = {}
         self.pushButton.clicked.connect(self.ejecutar_busqueda)
         self.pushButton_2.clicked.connect(self.ejecutar_ataque)
-        self.lineEdit_3.setValidator(QtGui.QIntValidator())
-        self.lineEdit_5.setValidator(QtGui.QIntValidator())
         self.shodan_browser = None
         self.cracker = None
 

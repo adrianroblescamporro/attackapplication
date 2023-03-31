@@ -4,6 +4,7 @@ from PyQt6.QtCore import QThread, pyqtSignal
 from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from HTTPrequest import HTTPrequest
 from selenium import webdriver
+from selenium.webdriver.common.by import By
 
 
 class Cracker(QThread, HTTPrequest):
@@ -38,6 +39,7 @@ class Cracker(QThread, HTTPrequest):
                 self.combinations.append(line.split(':'))
 
     def worker_basic(self):
+        self.Info.emit('Basic authentication')
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
@@ -54,6 +56,7 @@ class Cracker(QThread, HTTPrequest):
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
 
     def worker_digest(self):
+        self.Info.emit('Digest authentication')
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
@@ -68,11 +71,12 @@ class Cracker(QThread, HTTPrequest):
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' válidos')
 
     def worker_form(self):
+        self.Info.emit('Form authentication')
         driver = webdriver.Safari()
         driver.get(self.url_attack)
-        user_box = driver.find_element("id", "username")
-        pass_box = driver.find_element("id", "password")
-        login = driver.find_element("class_name", "ui-button fn-width80")
+        user_box = driver.find_element(By.XPATH, "//form[input/@type='text']")
+        pass_box = driver.find_element(By.XPATH, "//form[input/@type='password']")
+        login = driver.find_element(By.XPATH, "//form[input/@type='submit']")
 
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
@@ -111,3 +115,4 @@ class Cracker(QThread, HTTPrequest):
         # Esperamos a que terminen todos los hilos antes de terminar el programa principal
         for thread in threads:
             thread.join()
+        self.Info.emit('Fin del ataque')
