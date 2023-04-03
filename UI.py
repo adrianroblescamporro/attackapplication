@@ -65,7 +65,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             if not os.path.exists(dictionary):
                 QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
             else:
-                url_attack = 'http://' + disp
+                url_attack = 'http://' + '42.159.198.157:8081'
                 self.cracker = Cracker(url_attack, dictionary)
                 self.cracker.Info.connect(self.textEdit.append)
                 self.cracker.start()

