@@ -33,6 +33,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.list_dev = {}
         self.pushButton.clicked.connect(self.ejecutar_busqueda)
         self.pushButton_2.clicked.connect(self.ejecutar_ataque)
+        self.pushButton_3.clicked.connect(self.ejecutar_ataque_ejemplo)
         self.shodan_browser = None
         self.cracker = None
 
@@ -65,7 +66,21 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             if not os.path.exists(dictionary):
                 QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
             else:
-                url_attack = 'http://' + '42.159.198.157:8081'
+                url_attack = 'http://' + disp
+                self.cracker = Cracker(url_attack, dictionary)
+                self.cracker.Info.connect(self.textEdit.append)
+                self.cracker.start()
+
+    def ejecutar_ataque_ejemplo(self):
+        dictionary = self.lineEdit_4.text()
+        self.textEdit.clear()
+        if dictionary == "":
+            QMessageBox.critical(self, "Error", "Algún campo de información incompleto", QMessageBox.StandardButton.Ok)
+        else:
+            if not os.path.exists(dictionary):
+                QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
+            else:
+                url_attack = 'http://42.159.198.157:8081'
                 self.cracker = Cracker(url_attack, dictionary)
                 self.cracker.Info.connect(self.textEdit.append)
                 self.cracker.start()
