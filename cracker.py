@@ -39,7 +39,6 @@ class Cracker(QThread, HTTPrequest):
                 self.combinations.append(line.split(':'))
 
     def worker_basic(self):
-        self.Info.emit('Basic authentication')
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
@@ -56,7 +55,6 @@ class Cracker(QThread, HTTPrequest):
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
 
     def worker_digest(self):
-        self.Info.emit('Digest authentication')
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
@@ -71,7 +69,6 @@ class Cracker(QThread, HTTPrequest):
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' válidos')
 
     def worker_form(self):
-        self.Info.emit('Form authentication')
         try:
             driver = webdriver.Safari()
             driver.get(self.url_attack)
@@ -92,7 +89,7 @@ class Cracker(QThread, HTTPrequest):
 
             driver.close()
         except:
-            self.Info.emit('No se pudieron encontrar campos del formulario')
+            self.Info.emit('No se pudieron encontrar campos del formulario ')
 
     def run(self):
         self.read_dict()
@@ -101,18 +98,21 @@ class Cracker(QThread, HTTPrequest):
         if result['status'] < 0:
             self.Info.emit('No se admiten peticiones HTTP')
             self.terminate()
-        thread_count = 1
+        thread_count = 4
         threads = []
         for i in range(thread_count):
+            self.Info.emit('Basic authentication')
             if self.authentication == 'basic':
                 t = threading.Thread(target=self.worker_basic)
                 threads.append(t)
                 t.start()
             elif self.authentication == 'digest':
+                self.Info.emit('Digest authentication')
                 t = threading.Thread(target=self.worker_digest)
                 threads.append(t)
                 t.start()
             elif self.authentication == 'form':
+                self.Info.emit('Form authentication')
                 t = threading.Thread(target=self.worker_form)
                 threads.append(t)
                 t.start()
