@@ -8,7 +8,7 @@ from shodan_api import Shodanbrowser
 from cracker import Cracker
 
 # Inicializa las ventanas
-from PyQt6.QtWidgets import QMessageBox, QWidget, QHBoxLayout, QLabel, QComboBox, QListWidgetItem
+from PyQt6.QtWidgets import QMessageBox, QWidget, QHBoxLayout, QLabel, QComboBox, QListWidgetItem, QFileDialog
 
 qtCreatorFile = "UI.ui"
 Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
@@ -34,8 +34,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         self.pushButton.clicked.connect(self.ejecutar_busqueda)
         self.pushButton_2.clicked.connect(self.ejecutar_ataque)
         self.pushButton_3.clicked.connect(self.ejecutar_ataque_ejemplo)
+        self.pushButton_4.clicked.connect(self.abrir)
         self.shodan_browser = None
         self.cracker = None
+        self.dictionary = " "
 
     def ejecutar_busqueda(self):
         apikey = self.lineEdit.text()
@@ -57,33 +59,36 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
                 QMessageBox.critical(self, "Error", "API-Key no válida", QMessageBox.StandardButton.Ok)
 
     def ejecutar_ataque(self):
-        dictionary = self.lineEdit_4.text()
         self.textEdit.clear()
-        if self.shodan_browser is None or dictionary == "":
+        if self.shodan_browser is None or self.dictionary == "":
             QMessageBox.critical(self, "Error", "Algún campo de información incompleto", QMessageBox.StandardButton.Ok)
         else:
             disp = self.listWidget.currentItem().text()
-            if not os.path.exists(dictionary):
+            if not os.path.exists(self.dictionary):
                 QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
             else:
                 url_attack = 'http://' + disp
-                self.cracker = Cracker(url_attack, dictionary)
+                self.cracker = Cracker(url_attack, self.dictionary)
                 self.cracker.Info.connect(self.textEdit.append)
                 self.cracker.start()
 
     def ejecutar_ataque_ejemplo(self):
-        dictionary = self.lineEdit_4.text()
         self.textEdit.clear()
-        if dictionary == "":
+        if self.dictionary == "":
             QMessageBox.critical(self, "Error", "Algún campo de información incompleto", QMessageBox.StandardButton.Ok)
         else:
-            if not os.path.exists(dictionary):
+            if not os.path.exists(self.dictionary):
                 QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
             else:
                 url_attack = 'http://42.159.198.157:8081'
-                self.cracker = Cracker(url_attack, dictionary)
+                self.cracker = Cracker(url_attack, self.dictionary)
                 self.cracker.Info.connect(self.textEdit.append)
                 self.cracker.start()
+
+    def abrir(self):
+        archivo = QFileDialog.getOpenFileName(self, 'Abrir archivo', 'C:\\')
+        self.dictionary = archivo[0]
+        self.label_dictionary.setText('Diccionario cargado')
 
 
 if __name__ == "__main__":

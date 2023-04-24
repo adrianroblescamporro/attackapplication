@@ -98,7 +98,7 @@ class Cracker(QThread, HTTPrequest):
         if result['status'] < 0:
             self.Info.emit('No se admiten peticiones HTTP')
             self.terminate()
-        thread_count = 4
+        thread_count = 1
         threads = []
         for i in range(thread_count):
             self.Info.emit('Basic authentication')
