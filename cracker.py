@@ -5,6 +5,9 @@ from requests.auth import HTTPBasicAuth, HTTPDigestAuth
 from HTTPrequest import HTTPrequest
 from selenium import webdriver
 from selenium.webdriver.common.by import By
+from webdriver_manager.chrome import ChromeDriverManager
+from selenium.webdriver.chrome.service import Service as ChromeService
+from selenium.webdriver.chrome.options import Options
 
 
 class Cracker(QThread, HTTPrequest):
@@ -18,6 +21,7 @@ class Cracker(QThread, HTTPrequest):
         self.combinations = []
         self.lock_access_file = threading.Lock()
         self.index = 0
+        self.options = Options()
 
     def detect_auth(self):
         request = {'method': 'get', 'url': self.url_attack}
@@ -70,8 +74,9 @@ class Cracker(QThread, HTTPrequest):
 
     def worker_form(self):
         try:
-            driver = webdriver.Safari()
+            driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=self.options)
             driver.get(self.url_attack)
+            driver.set_window_rect(0,0,700,500)
             user_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='text']")
             pass_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='password']")
             login = driver.find_element(By.XPATH, "//form/fieldset/button[@type='button']")
