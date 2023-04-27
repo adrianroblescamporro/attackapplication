@@ -20,7 +20,9 @@ class Cracker(QThread, HTTPrequest):
         self.dictionary = dictionary
         self.combinations = []
         self.lock_access_file = threading.Lock()
+        self.lock_window = threading.Lock()
         self.index = 0
+        self.number = 0
         self.options = Options()
 
     def detect_auth(self):
@@ -74,9 +76,16 @@ class Cracker(QThread, HTTPrequest):
 
     def worker_form(self):
         try:
+            self.lock_window.acquire()
             driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=self.options)
             driver.get(self.url_attack)
-            driver.set_window_rect(0,0,700,500)
+            if self.number < 2:
+                driver.set_window_rect(0 + self.number * 700, 0, 700, 400)
+            else:
+                driver.set_window_rect(0+(self.number-2)*700, 400, 700, 400)
+            self.number += 1
+            self.lock_window.release()
+            self.sleep(9-self.number)
             user_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='text']")
             pass_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='password']")
             login = driver.find_element(By.XPATH, "//form/fieldset/button[@type='button']")
@@ -103,7 +112,7 @@ class Cracker(QThread, HTTPrequest):
         if result['status'] < 0:
             self.Info.emit('No se admiten peticiones HTTP')
             self.terminate()
-        thread_count = 1
+        thread_count = 4
         threads = []
         for i in range(thread_count):
             self.Info.emit('Basic authentication')
