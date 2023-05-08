@@ -77,13 +77,10 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         if self.dictionary == "":
             QMessageBox.critical(self, "Error", "Algún campo de información incompleto", QMessageBox.StandardButton.Ok)
         else:
-            if not os.path.exists(self.dictionary):
-                QMessageBox.critical(self, "Error", "Ruta de archivo incorrecta", QMessageBox.StandardButton.Ok)
-            else:
-                url_attack = 'http://42.159.198.157:8081'
-                self.cracker = Cracker(url_attack, self.dictionary)
-                self.cracker.Info.connect(self.textEdit.append)
-                self.cracker.start()
+            url_attack = 'http://42.159.198.157:8081'
+            self.cracker = Cracker(url_attack, self.dictionary)
+            self.cracker.Info.connect(self.textEdit.append)
+            self.cracker.start()
 
     def abrir(self):
         archivo = QFileDialog.getOpenFileName(self, 'Abrir archivo', 'C:\\')

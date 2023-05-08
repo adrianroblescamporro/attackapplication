@@ -28,7 +28,7 @@ class Shodanbrowser(QThread):
             self.State.emit('Busqueda finalizada')
 
         except Exception as e:
-            print('Error: {}'.format(e))
+            self.Info.emit('Error: {}'.format(e))
 
     def print(self, text):
         self.Info.emit(text)

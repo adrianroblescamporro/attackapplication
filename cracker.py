@@ -115,8 +115,8 @@ class Cracker(QThread, HTTPrequest):
         thread_count = 4
         threads = []
         for i in range(thread_count):
-            self.Info.emit('Basic authentication')
             if self.authentication == 'basic':
+                self.Info.emit('Basic authentication')
                 t = threading.Thread(target=self.worker_basic)
                 threads.append(t)
                 t.start()
