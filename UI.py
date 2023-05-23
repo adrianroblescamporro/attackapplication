@@ -16,8 +16,7 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
 def check_api_key(possible_api_key):
     try:
-        api = Shodan(possible_api_key)
-        info = api.info()
+        Shodan(possible_api_key)
         return True
     except Exception:
         return False
@@ -29,8 +28,6 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
         Ui_MainWindow.__init__(self)
         self.setupUi(self)
 
-        self.devices = {}
-        self.list_dev = {}
         self.pushButton.clicked.connect(self.ejecutar_busqueda)
         self.pushButton_2.clicked.connect(self.ejecutar_ataque)
         self.pushButton_3.clicked.connect(self.ejecutar_ataque_ejemplo)
