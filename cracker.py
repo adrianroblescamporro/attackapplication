@@ -32,17 +32,22 @@ class Cracker(QThread, HTTPrequest):
             if response.status_code == 200:
                 self.authentication = 'form'
             if response.status_code == 401:
-                if response.headers['WWW-Authenticate'].find('Basic') != -1:
+                if response.headers['WWW-Authenticate'].find('Basic') != -1 or response.headers['www-authenticate'].find('Basic') != -1:
                     self.authentication = 'basic'
-                elif response.headers['WWW-Authenticate'].find('Digest') != -1:
+                elif response.headers['WWW-Authenticate'].find('Digest') != -1 or response.headers['www-authenticate'].find('Basic') != -1:
                     self.authentication = 'digest'
+                else:
+                    self.Info.emit('Autenticación no contemplada')
+            else:
+                self.Info.emit('HTTP '+ response.status_code)
         return result
 
     def read_dict(self):
         with open(self.dictionary) as file:
             lines = file.readlines()
             for line in lines:
-                self.combinations.append(line.split(':'))
+                    self.combinations.append(line.split(':'))
+
 
     def worker_basic(self):
         while self.index < len(self.combinations):
@@ -73,6 +78,9 @@ class Cracker(QThread, HTTPrequest):
 
             if response.status_code == 200:
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' válidos')
+            else:
+                self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
+
 
     def worker_form(self):
         try:
@@ -107,6 +115,7 @@ class Cracker(QThread, HTTPrequest):
 
     def run(self):
         self.read_dict()
+
         self.Info.emit('Iniciando ataque...')
         result = self.detect_auth()
         if result['status'] < 0:

@@ -80,7 +80,7 @@ class MyApp(QtWidgets.QMainWindow, Ui_MainWindow):
             self.cracker.start()
 
     def abrir(self):
-        archivo = QFileDialog.getOpenFileName(self, 'Abrir archivo', 'C:\\')
+        archivo = QFileDialog.getOpenFileName(self, 'Abrir archivo', 'C:\\', "Wanted Files (*.txt)")
         self.dictionary = archivo[0]
         self.label_dictionary.setText('Diccionario cargado')
 
