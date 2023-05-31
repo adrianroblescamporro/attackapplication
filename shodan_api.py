@@ -8,7 +8,7 @@ class Shodanbrowser(QThread):
     Info = pyqtSignal(str)
     State = pyqtSignal(str)
 
-    # Metodo que inicializa la api de Shodan con la API-Key gratuita
+    # Método que inicializa la api de Shodan con la API-Key gratuita
     def __init__(self, api_key, query):
         super().__init__()
         self.api = Shodan(api_key)

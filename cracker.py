@@ -32,22 +32,23 @@ class Cracker(QThread, HTTPrequest):
             if response.status_code == 200:
                 self.authentication = 'form'
             if response.status_code == 401:
-                if response.headers['WWW-Authenticate'].find('Basic') != -1 or response.headers['www-authenticate'].find('Basic') != -1:
+                if response.headers['WWW-Authenticate'].find('Basic') != -1 or response.headers[
+                    'www-authenticate'].find('Basic') != -1:
                     self.authentication = 'basic'
-                elif response.headers['WWW-Authenticate'].find('Digest') != -1 or response.headers['www-authenticate'].find('Basic') != -1:
+                elif response.headers['WWW-Authenticate'].find('Digest') != -1 or response.headers[
+                    'www-authenticate'].find('Basic') != -1:
                     self.authentication = 'digest'
                 else:
                     self.Info.emit('Autenticación no contemplada')
             else:
-                self.Info.emit('HTTP '+ response.status_code)
+                self.Info.emit('HTTP ' + str(response.status_code))
         return result
 
     def read_dict(self):
         with open(self.dictionary) as file:
             lines = file.readlines()
             for line in lines:
-                    self.combinations.append(line.split(':'))
-
+                self.combinations.append(line.split(':'))
 
     def worker_basic(self):
         while self.index < len(self.combinations):
@@ -81,7 +82,6 @@ class Cracker(QThread, HTTPrequest):
             else:
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
 
-
     def worker_form(self):
         try:
             self.lock_window.acquire()
@@ -90,10 +90,10 @@ class Cracker(QThread, HTTPrequest):
             if self.number < 2:
                 driver.set_window_rect(0 + self.number * 700, 0, 700, 400)
             else:
-                driver.set_window_rect(0+(self.number-2)*700, 400, 700, 400)
+                driver.set_window_rect(0 + (self.number - 2) * 700, 400, 700, 400)
             self.number += 1
             self.lock_window.release()
-            self.sleep(9-self.number)
+            self.sleep(9 - self.number)
             user_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='text']")
             pass_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='password']")
             login = driver.find_element(By.XPATH, "//form/fieldset/button[@type='button']")

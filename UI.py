@@ -16,7 +16,7 @@ Ui_MainWindow, QtBaseClass = uic.loadUiType(qtCreatorFile)
 
 def check_api_key(possible_api_key):
     try:
-        Shodan(possible_api_key)
+        Shodan(possible_api_key).info()
         return True
     except Exception:
         return False
