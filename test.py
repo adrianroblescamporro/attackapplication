@@ -11,7 +11,7 @@ apikey = "myapi"
 
 # API Key válida
 apikeyvalid = "Y0lQVErgyVSD60dg6HosPpU0fidW8dmq"
-query = "tag:iot"
+query = "tag:iot" #filtro no válido para API Key
 
 url_attack = 'http://42.159.198.157:8081'
 

