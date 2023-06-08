@@ -32,15 +32,13 @@ class Cracker(QThread, HTTPrequest):
             if response.status_code == 200:
                 self.authentication = 'form'
             if response.status_code == 401:
-                if response.headers['WWW-Authenticate'].find('Basic') != -1 or response.headers[
-                    'www-authenticate'].find('Basic') != -1:
+                if response.headers['WWW-Authenticate'].find('Basic') != -1 or response.headers['www-authenticate'].find('Basic') != -1:
                     self.authentication = 'basic'
-                elif response.headers['WWW-Authenticate'].find('Digest') != -1 or response.headers[
-                    'www-authenticate'].find('Basic') != -1:
+                elif response.headers['WWW-Authenticate'].find('Digest') != -1 or response.headers['www-authenticate'].find('Basic') != -1:
                     self.authentication = 'digest'
                 else:
                     self.Info.emit('Autenticación no contemplada')
-            else:
+            elif response.status_code != 200 and response.status_code != 401:
                 self.Info.emit('HTTP ' + str(response.status_code))
         return result
 
@@ -93,7 +91,7 @@ class Cracker(QThread, HTTPrequest):
                 driver.set_window_rect(0 + (self.number - 2) * 700, 400, 700, 400)
             self.number += 1
             self.lock_window.release()
-            self.sleep(9 - self.number)
+            self.sleep(12 - self.number)
             user_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='text']")
             pass_box = driver.find_element(By.XPATH, "//form/fieldset/input[@type='password']")
             login = driver.find_element(By.XPATH, "//form/fieldset/button[@type='button']")

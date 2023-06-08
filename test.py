@@ -10,7 +10,7 @@ from shodan import Shodan, APIError
 apikey = "myapi"
 
 # API Key válida
-apikeyvalid = "wdIjyg7aUyE0SEzSCgDQnkXtEMKLNhd4"
+apikeyvalid = "Y0lQVErgyVSD60dg6HosPpU0fidW8dmq"
 query = "tag:iot"
 
 url_attack = 'http://42.159.198.157:8081'
@@ -25,7 +25,7 @@ class Test(unittest.TestCase):
         with self.assertRaises(APIError):
             shodan_browser.search(query)
 
-    def test_detect_auth(self):
+    def test_request(self):
         http_request = HTTPrequest()
         request = {'method': 'get', 'url': url_attack}
         response, result = http_request.request(request)
